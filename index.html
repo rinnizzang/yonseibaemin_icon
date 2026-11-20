@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>배달의민족 - 주문하기 개선안 (아이콘형)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #E5E7EB;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* 모바일 앱 컨테이너 */
+    .app-shell {
+      width: 100%;
+      max-width: 430px;
+      height: 100dvh;
+      background-color: #F4F5F7;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+    }
+
+    /* 전체 펼침 부드러운 세로 스크롤 영역 */
+    .scroll-viewport {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      padding: 20px 20px 36px 20px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .scroll-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* 섹션 카드 스타일 (모두 펼쳐진 상태로 유지) */
+    .section-card {
+      background-color: #FFFFFF;
+      border-radius: 18px;
+      box-shadow: 0 3px 14px rgba(0, 0, 0, 0.055);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      margin-bottom: 18px;
+      padding: 20px;
+      transition: box-shadow 0.25s ease, transform 0.25s ease;
+    }
+
+    /* 아이콘 옵션 버튼 */
+    .icon-option-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: transparent;
+      border: none;
+      padding: 6px 4px;
+      border-radius: 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .icon-option-btn:active {
+      transform: scale(0.94);
+    }
+
+    /* 아이콘 래퍼 (O / X 오버레이 기준 박스) */
+    .icon-visual-box {
+      position: relative;
+      width: 72px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    /* 아이콘 자체 그래픽 */
+    .icon-graphic {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: filter 0.24s ease, opacity 0.24s ease, transform 0.22s ease;
+    }
+
+    /* 2회 클릭 시: 아이콘 흑백 처리 */
+    .icon-option-btn[data-choice="no"] .icon-graphic {
+      filter: grayscale(100%) brightness(0.96) contrast(0.92);
+      opacity: 0.64;
+    }
+
+    /* O / X 오버레이 배지 */
+    .mark-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.72);
+      transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .icon-option-btn[data-choice="yes"] .mark-overlay.mark-yes,
+    .icon-option-btn[data-choice="no"] .mark-overlay.mark-no {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* 라벨 텍스트 상태 */
+    .icon-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #111827;
+      line-height: 1.3;
+      text-align: center;
+      word-break: keep-all;
+      transition: color 0.2s ease, font-weight 0.2s ease;
+    }
+    .icon-option-btn[data-choice="yes"] .icon-label {
+      color: #15803D;
+      font-weight: 700;
+    }
+    .icon-option-btn[data-choice="no"] .icon-label {
+      color: #9CA3AF;
+    }
+
+    /* 할인쿠폰 체크박스 행 */
+    .coupon-row {
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1.5px solid #E5E7EB;
+      background-color: #FFFFFF;
+      transition: background-color 0.22s ease, border-color 0.22s ease;
+    }
+    .coupon-row.checked {
+      background-color: rgba(43, 56, 230, 0.05);
+      border-color: #2B38E6;
+    }
+    .custom-checkbox {
+      width: 21px;
+      height: 21px;
+      border-radius: 6px;
+      border: 1.8px solid #9CA3AF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background-color: #FFFFFF;
+      transition: all 0.18s ease;
+    }
+    .coupon-row.checked .custom-checkbox {
+      background-color: #2B38E6;
+      border-color: #2B38E6;
+    }
+    .coupon-row.checked .check-icon {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .check-icon {
+      opacity: 0;
+      transform: scale(0.6);
+      transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 하단 결제 버튼 (스크롤 끝 도달 시 opacity로 활성화 표시) */
+    .pay-btn {
+      background-color: #1CE3CE;
+      color: #111827;
+      opacity: 0.3;
+      transition: opacity 0.32s ease, transform 0.18s ease, box-shadow 0.32s ease;
+    }
+    .pay-btn:disabled {
+      cursor: default;
+      box-shadow: none;
+    }
+    .pay-btn:not(:disabled) {
+      opacity: 1 !important;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(28, 227, 206, 0.34);
+    }
+    .pay-btn:not(:disabled):active {
+      transform: scale(0.97);
+    }
+
+    @keyframes modalPop {
+      0% {
+        opacity: 0;
+        transform: translateY(14px) scale(0.97);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .modal-pop {
+      animation: modalPop 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+    <!-- 상단 고정 헤더 -->
+    <header class="sticky top-0 z-30 bg-white h-14 px-4 flex items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.06)] shrink-0">
+      <div class="w-14"></div>
+      <h1 class="text-[17px] font-bold text-gray-900 tracking-tight">주문하기</h1>
+      <div class="w-14 flex justify-end">
+        <button
+          id="resetBtn"
+          type="button"
+          onclick="resetPrototype()"
+          title="처음부터 다시하기"
+          class="text-xs font-medium text-gray-400 hover:text-gray-700 px-2 py-1 rounded-md hover:bg-gray-100 transition"
+        >
+          초기화
+        </button>
+      </div>
+    </header>
+
+    <!-- 전체 섹션이 펼쳐진 세로 스크롤 영역 -->
+    <main id="scrollViewport" class="scroll-viewport">
+      <div class="w-full max-w-[360px] mx-auto">
+
+        <!-- =========================================================
+             SECTION 1: 배달 주소
+        ========================================================== -->
+        <section id="section-address" class="section-card">
+          <h2 class="text-[16px] font-bold text-gray-900 mb-3.5">배달 주소</h2>
+
+          <!-- 신촌(연세로 50) 지도 -->
+          <div class="w-full h-[146px] bg-[#E5E7EB] rounded-xl mb-4 relative overflow-hidden border border-gray-200 shadow-inner">
+            <iframe
+              title="신촌 연세로 50 지도"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=126.9325%2C37.5542%2C126.9428%2C37.5615&layer=mapnik&marker=37.5585%2C126.9376"
+              class="w-full h-full border-0"
+              loading="lazy"
+            ></iframe>
+            <div class="pointer-events-none absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-sm border border-gray-200/80 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-[#1CE3CE]"></span>
+              <span class="text-[11px] font-bold text-gray-800">신촌 · 연세로 50</span>
+            </div>
+          </div>
+
+          <!-- 기본 주소 -->
+          <div class="mb-3">
+            <p class="text-[15px] font-bold text-gray-900 mb-1.5">서울 서대문구 연세로50</p>
+            <input
+              id="detailAddressInput"
+              type="text"
+              placeholder="상세 주소 입력"
+              class="w-full h-[38px] px-3 text-[13.5px] text-gray-800 placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:border-gray-800 transition"
+            />
+          </div>
+
+          <!-- 공동현관 비밀번호 -->
+          <div class="mb-3">
+            <label for="gateCodeInput" class="block text-[13.5px] font-bold text-gray-900 mb-1.5">공동현관 비밀번호</label>
+            <input
+              id="gateCodeInput"
+              type="text"
+              placeholder="예) #1234"
+              class="w-full h-[38px] px-3 text-[13.5px] text-gray-800 placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:border-gray-800 transition"
+            />
+          </div>
+
+          <!-- 찾아오는 길 안내 -->
+          <div class="mb-5">
+            <label for="directionInput" class="block text-[13.5px] font-bold text-gray-900 mb-1.5">찾아오는 길 안내</label>
+            <input
+              id="directionInput"
+              type="text"
+              placeholder="예) 언더우드관 뒤 건물이에요"
+              class="w-full h-[38px] px-3 text-[13.5px] text-gray-800 placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:border-gray-800 transition"
+            />
+          </div>
+
+          <!-- 주소 등록 버튼 (누르면 자연스럽게 다음 섹션으로 스크롤) -->
+          <button
+            id="submitAddressBtn"
+            type="button"
+            onclick="registerAddressAndScroll()"
+            class="w-full h-[42px] bg-black hover:bg-gray-900 active:scale-[0.99] text-white text-[14px] font-bold rounded-md transition"
+          >
+            주소 등록
+          </button>
+        </section>
+
+        <!-- =========================================================
+             SECTION 2: 배달 요청사항 (중복 선택 가능, 1클릭 O / 2클릭 흑백+X)
+        ========================================================== -->
+        <section id="section-delivery" class="section-card">
+          <h2 class="text-[16px] font-bold text-gray-900 mb-5">배달 요청사항</h2>
+
+          <div class="grid grid-cols-3 gap-2 pt-1 pb-2">
+            <!-- 1. 노크하기 -->
+            <button
+              type="button"
+              data-group="delivery"
+              data-id="knock"
+              data-label="노크하기"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <!-- 통일된 앰버·골드 + 블루 톤의 선명한 노크하기 아이콘 -->
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <!-- 문 프레임 -->
+                    <rect x="14" y="6" width="28" height="44" rx="3" fill="#F59E0B" stroke="#1E293B" stroke-width="2.2"/>
+                    <rect x="18" y="10" width="20" height="36" rx="1.5" fill="#FCD34D" stroke="#B45309" stroke-width="1.3"/>
+                    <!-- 노크 파동 -->
+                    <path d="M24 20.5C25.5 19.2 27.5 19.2 29 20.5" stroke="#1E293B" stroke-width="1.9" stroke-linecap="round"/>
+                    <path d="M22 17.5C24.8 15.3 28.2 15.3 31 17.5" stroke="#78350F" stroke-width="1.6" stroke-linecap="round"/>
+                    <!-- 노크하는 주먹 손 -->
+                    <path d="M23 30C23 27.5 25 25.5 27.5 25.5H29.5C31.7 25.5 33.5 27.3 33.5 29.5V33.5C33.5 36.5 31 39 28 39H26.5C24.5 39 23 37.5 23 35.5V30Z" fill="#E0F2FE" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M25.5 26V29.5M28 25.8V29.5M30.5 26.5V29.8" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"/>
+                    <path d="M23 32.5H27.5C28.6 32.5 29.5 33.4 29.5 34.5" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <!-- 1회 클릭: 초록색 O -->
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <!-- 2회 클릭: 빨간색 X -->
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">노크하기</span>
+            </button>
+
+            <!-- 2. 초인종 누르기 -->
+            <button
+              type="button"
+              data-group="delivery"
+              data-id="doorbell"
+              data-label="초인종 누르기"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <!-- 통일된 앰버·골드 톤의 선명한 초인종 아이콘 -->
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <!-- 울림 표시 -->
+                    <path d="M14 17C14.8 14 16.8 11.8 19.5 10.6" stroke="#1E293B" stroke-width="2.1" stroke-linecap="round"/>
+                    <path d="M42 17C41.2 14 39.2 11.8 36.5 10.6" stroke="#1E293B" stroke-width="2.1" stroke-linecap="round"/>
+                    <!-- 상단 고리 -->
+                    <circle cx="28" cy="10.5" r="2.5" fill="#F59E0B" stroke="#1E293B" stroke-width="2"/>
+                    <!-- 종 몸체 -->
+                    <path d="M28 13C20.8 13 16.5 18.2 16.5 26.5V34.5L13.5 38.5C12.8 39.4 13.4 40.8 14.6 40.8H41.4C42.6 40.8 43.2 39.4 42.5 38.5L39.5 34.5V26.5C39.5 18.2 35.2 13 28 13Z" fill="#FACC15" stroke="#1E293B" stroke-width="2.1" stroke-linejoin="round"/>
+                    <!-- 하단 종추 -->
+                    <path d="M23.5 41C23.9 43.4 25.8 45 28 45C30.2 45 32.1 43.4 32.5 41" fill="#F59E0B" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">초인종 누르기</span>
+            </button>
+
+            <!-- 3. 전화하기 -->
+            <button
+              type="button"
+              data-group="delivery"
+              data-id="call"
+              data-label="전화하기"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <!-- 통일된 스카이 블루 톤의 선명한 전화기 아이콘 -->
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <!-- 통화 신호 파동 -->
+                    <path d="M31 15.5C36.2 16 40.2 20 40.7 25.2" stroke="#0284C7" stroke-width="2.1" stroke-linecap="round"/>
+                    <path d="M31 10.5C39 11.2 45.2 17.4 45.9 25.4" stroke="#38BDF8" stroke-width="1.9" stroke-linecap="round"/>
+                    <!-- 수화기 -->
+                    <path d="M19.2 14.5C20.3 13.4 22.1 13.5 23.1 14.7L26.2 18.5C27.1 19.6 27 21.2 26 22.2L23.8 24.4C25.5 27.6 28.2 30.3 31.4 32L33.6 29.8C34.6 28.8 36.2 28.7 37.3 29.6L41.1 32.7C42.3 33.7 42.4 35.5 41.3 36.6L39.1 38.8C36.6 41.3 32.7 41.9 29.5 40.2C23.5 37 18.8 32.3 15.6 26.3C13.9 23.1 14.5 19.2 17 16.7L19.2 14.5Z" fill="#38BDF8" stroke="#1E293B" stroke-width="2.1" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">전화하기</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 3: 가게 요청사항 (1클릭 O / 2클릭 흑백+X)
+        ========================================================== -->
+        <section id="section-store" class="section-card">
+          <h2 class="text-[16px] font-bold text-gray-900 mb-5">가게 요청사항</h2>
+
+          <div class="grid grid-cols-2 gap-4 max-w-[248px] mx-auto pt-1 pb-2">
+            <!-- 1. 수저, 포크 받기 -->
+            <button
+              type="button"
+              data-group="store"
+              data-id="cutlery"
+              data-label="수저, 포크 받기"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <!-- 통일된 스카이 블루 + 앰버 손잡이 포크 & 숟가락 아이콘 -->
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <!-- 포크 (왼쪽) -->
+                    <path d="M17 9V17.5C17 19.7 18.8 21.5 21 21.5C23.2 21.5 25 19.7 25 17.5V9" stroke="#1E293B" stroke-width="2.1" stroke-linecap="round"/>
+                    <path d="M21 9V27" stroke="#1E293B" stroke-width="2.1" stroke-linecap="round"/>
+                    <rect x="19" y="27" width="4" height="20" rx="2" fill="#F59E0B" stroke="#1E293B" stroke-width="1.9"/>
+                    <!-- 숟가락 (오른쪽) -->
+                    <ellipse cx="35" cy="15.5" rx="4.5" ry="6.5" fill="#7DD3FC" stroke="#1E293B" stroke-width="2"/>
+                    <path d="M35 22V27" stroke="#1E293B" stroke-width="2.1" stroke-linecap="round"/>
+                    <rect x="33" y="27" width="4" height="20" rx="2" fill="#F59E0B" stroke="#1E293B" stroke-width="1.9"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">수저, 포크 받기</span>
+            </button>
+
+            <!-- 2. 기본 반찬 받기 -->
+            <button
+              type="button"
+              data-group="store"
+              data-id="sidedish"
+              data-label="기본 반찬 받기"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <!-- 선명한 프레시 그린 반찬 접시 아이콘 -->
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="19.5" fill="#E0F2FE" stroke="#475569" stroke-width="2.2"/>
+                    <circle cx="28" cy="28" r="14.5" fill="#FFFFFF" stroke="#93C5FD" stroke-width="1.4"/>
+                    <!-- 채소/반찬 잎 모티프 -->
+                    <path d="M28 18C23.5 18 20.5 22.2 21.8 26.8C20.2 28.4 20.6 31.4 22.8 32.6C23.2 35.6 25.4 37.5 28 37.5C30.6 37.5 32.8 35.6 33.2 32.6C35.4 31.4 35.8 28.4 34.2 26.8C35.5 22.2 32.5 18 28 18Z" fill="#4ADE80" stroke="#15803D" stroke-width="1.8" stroke-linejoin="round"/>
+                    <path d="M28 21.5V35.5M28 26L24.5 23.5M28 29.5L31.5 27" stroke="#15803D" stroke-width="1.6" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">기본 반찬 받기</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 4: 결제수단 (신용카드 간결 아이콘 + 배민페이머니/카카오페이 로고 유지)
+        ========================================================== -->
+        <section id="section-payment" class="section-card">
+          <h2 class="text-[16px] font-bold text-gray-900 mb-5">결제수단</h2>
+
+          <div class="grid grid-cols-3 gap-2 pt-1 pb-2">
+            <!-- 1. 신용카드 -->
+            <button
+              type="button"
+              data-group="payment"
+              data-id="card"
+              data-label="신용카드"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <!-- 통일된 스카이 블루 + 앰버·골드 신용카드 아이콘 -->
+                  <svg width="62" height="56" viewBox="0 0 62 56" fill="none">
+                    <!-- 뒤쪽 골드 카드 -->
+                    <rect x="14" y="13" width="38" height="24" rx="4" transform="rotate(-14 14 13)" fill="#FBBF24" stroke="#1E293B" stroke-width="1.8"/>
+                    <path d="M13 20.5L47.5 11.8" stroke="#1E293B" stroke-width="3.2"/>
+                    <!-- 앞쪽 블루 카드 -->
+                    <rect x="10" y="21" width="40" height="25" rx="4" fill="#3B82F6" stroke="#1E293B" stroke-width="2"/>
+                    <!-- IC 칩 -->
+                    <rect x="15" y="26.5" width="7" height="5.5" rx="1.2" fill="#FDE047" stroke="#1E293B" stroke-width="1.2"/>
+                    <!-- 카드 번호 도트 -->
+                    <rect x="15" y="38.5" width="5" height="2.4" rx="1.2" fill="#FFFFFF"/>
+                    <rect x="23" y="38.5" width="5" height="2.4" rx="1.2" fill="#FFFFFF"/>
+                    <rect x="31" y="38.5" width="5" height="2.4" rx="1.2" fill="#FFFFFF"/>
+                    <rect x="39" y="38.5" width="5" height="2.4" rx="1.2" fill="#FFFFFF"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">신용카드</span>
+            </button>
+
+            <!-- 2. 배민페이머니 (로고 유지) -->
+            <button
+              type="button"
+              data-group="payment"
+              data-id="baeminpay"
+              data-label="배민페이머니"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <svg width="70" height="44" viewBox="0 0 88 44" fill="none">
+                    <!-- 배민 민트 텍스트 -->
+                    <text x="3" y="28" fill="#2AC1BC" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="16" letter-spacing="-0.8">배민</text>
+                    <!-- 노란 PAY 코인 -->
+                    <circle cx="44" cy="22" r="9.5" fill="#FFD43B" stroke="#1F2937" stroke-width="1.6"/>
+                    <text x="44" y="25" text-anchor="middle" fill="#1F2937" font-family="'Inter', sans-serif" font-weight="900" font-size="6.8">PAY</text>
+                    <!-- 페이 다크 텍스트 -->
+                    <text x="56" y="28" fill="#1F2937" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="16" letter-spacing="-0.8">페이</text>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">배민페이머니</span>
+            </button>
+
+            <!-- 3. 카카오페이 (로고 유지) -->
+            <button
+              type="button"
+              data-group="payment"
+              data-id="kakaopay"
+              data-label="카카오페이"
+              data-choice="none"
+              onclick="toggleIconChoice(this)"
+              class="icon-option-btn"
+            >
+              <div class="icon-visual-box">
+                <div class="icon-graphic">
+                  <svg width="68" height="44" viewBox="0 0 84 44" fill="none">
+                    <rect x="4" y="8" width="76" height="28" rx="14" fill="#FEE500"/>
+                    <!-- 카카오 말풍선 심볼 -->
+                    <ellipse cx="24" cy="21" rx="7.2" ry="5.6" fill="#191919"/>
+                    <path d="M20.5 25L18.8 29.2L23.5 26.2" fill="#191919"/>
+                    <!-- pay 워드마크 -->
+                    <text x="35" y="26.5" fill="#191919" font-family="'Inter', sans-serif" font-weight="800" font-size="16.5" letter-spacing="-0.5">pay</text>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-yes">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle cx="28" cy="28" r="20" fill="rgba(255,255,255,0.22)" stroke="#16A34A" stroke-width="4.5"/>
+                  </svg>
+                </div>
+                <div class="mark-overlay mark-no">
+                  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M15 15L41 41M41 15L15 41" stroke="#DC2626" stroke-width="4.8" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="icon-label">카카오페이</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 5: 할인쿠폰 (체크박스 형태)
+        ========================================================== -->
+        <section id="section-coupon" class="section-card">
+          <div class="flex items-baseline gap-2 mb-3.5">
+            <h2 class="text-[16px] font-bold text-gray-900">할인쿠폰</h2>
+            <span id="couponBadgeText" class="text-[11.5px] font-semibold text-[#2B38E6]">최대 할인 적용중</span>
+          </div>
+
+          <div class="space-y-2">
+            <!-- 쿠폰 1: 3,000원 (기본 체크됨) -->
+            <button
+              type="button"
+              data-coupon="3000"
+              onclick="toggleCouponCheckbox(3000, this)"
+              class="coupon-row checked w-full flex items-center justify-between text-left cursor-pointer"
+            >
+              <div class="flex items-center gap-3">
+                <span class="custom-checkbox">
+                  <svg class="check-icon w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <span class="text-[14px] text-gray-800">
+                  <strong class="text-[#2B38E6] font-bold">3,000원</strong> 브랜드 중복 할인 쿠폰
+                </span>
+              </div>
+              <span class="text-[11px] font-semibold text-[#2B38E6]">최대</span>
+            </button>
+
+            <!-- 쿠폰 2: 2,000원 -->
+            <button
+              type="button"
+              data-coupon="2000"
+              onclick="toggleCouponCheckbox(2000, this)"
+              class="coupon-row w-full flex items-center justify-between text-left cursor-pointer"
+            >
+              <div class="flex items-center gap-3">
+                <span class="custom-checkbox">
+                  <svg class="check-icon w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <span class="text-[14px] text-gray-800">
+                  <strong class="text-[#2B38E6] font-bold">2,000원</strong> 배민클럽 전용 쿠폰
+                </span>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 6: 영수증 (최종 검토용 - 확인 버튼 없음)
+        ========================================================== -->
+        <section id="section-receipt" class="section-card mb-2">
+          <h2 class="text-[16px] font-bold text-gray-900 mb-4">영수증</h2>
+
+          <!-- 기본 금액 내역 -->
+          <div class="space-y-2 text-[14px] text-gray-700 mb-4">
+            <div class="flex justify-between">
+              <span>메뉴금액</span>
+              <span class="font-medium">38,500원</span>
+            </div>
+            <div class="flex justify-between">
+              <span>배달팁</span>
+              <span class="font-medium">2,000원</span>
+            </div>
+          </div>
+
+          <!-- 할인 내역 -->
+          <div class="space-y-2 text-[14px] pt-3 border-t border-gray-100 mb-5">
+            <div class="flex justify-between font-bold text-[#2B38E6]">
+              <span>총 할인받은 금액</span>
+              <span id="totalDiscountText">-6,000원</span>
+            </div>
+            <div class="flex justify-between text-gray-600 text-[13.5px]">
+              <span>배달팁 할인</span>
+              <span class="text-[#2B38E6]">-1,000원</span>
+            </div>
+            <div class="flex justify-between text-gray-600 text-[13.5px]">
+              <span>BHC 할인</span>
+              <span class="text-[#2B38E6]">-2,000원</span>
+            </div>
+            <div class="flex justify-between text-gray-600 text-[13.5px]">
+              <span>할인쿠폰</span>
+              <span id="couponReceiptText" class="text-[#2B38E6]">-3,000원</span>
+            </div>
+          </div>
+
+          <!-- 최종 결제금액 -->
+          <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+            <span class="text-[15.5px] font-bold text-gray-900">결제금액</span>
+            <span id="finalReceiptPrice" class="text-[16.5px] font-extrabold text-gray-900">34,500원</span>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- 하단 고정 결제 바 (별도 안내 문구 없이 스크롤 끝에 도달 시 투명도 1로 활성화) -->
+    <footer class="sticky bottom-0 z-30 bg-white px-5 pt-3.5 pb-6 shadow-[0_-2px_12px_rgba(0,0,0,0.05)] flex justify-end items-center shrink-0">
+      <button
+        id="payButton"
+        type="button"
+        disabled
+        onclick="openPaymentModal()"
+        class="pay-btn h-[50px] px-7 rounded-lg text-[16px] font-extrabold tracking-tight"
+      >
+        34,500원 결제하기
+      </button>
+    </footer>
+
+    <!-- 결제 완료 모달 -->
+    <div id="completeModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-5">
+      <div class="bg-white w-full max-w-[360px] rounded-2xl p-6 shadow-2xl text-center modal-pop">
+        <div class="w-14 h-14 rounded-full bg-[#1CE3CE]/20 text-[#0FA898] flex items-center justify-center mx-auto mb-3.5">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h3 class="text-[19px] font-extrabold text-gray-900 mb-1">주문이 완료되었습니다!</h3>
+        <p class="text-[13.5px] text-gray-500 mb-4">선택하신 아이콘 옵션으로 결제가 진행되었어요.</p>
+
+        <div id="orderSummaryBox" class="bg-gray-50 rounded-xl p-3.5 text-left text-[12.5px] text-gray-700 space-y-1.5 mb-5 border border-gray-100">
+          <!-- 요약 내역 JS 삽입 -->
+        </div>
+
+        <button
+          type="button"
+          onclick="resetPrototype()"
+          class="w-full h-[44px] bg-[#1CE3CE] hover:bg-[#17D1BD] text-gray-900 font-extrabold text-[14.5px] rounded-xl transition"
+        >
+          처음부터 다시 체험하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 상태 관리
+    // =========================================================
+    const state = {
+      address: {
+        base: '서울 서대문구 연세로50',
+        detail: '',
+        gate: '',
+        direction: ''
+      },
+      couponDiscount: 3000,
+      reachedBottom: false
+    };
+
+    // =========================================================
+    // 1. 배달 주소 등록 -> 다음 섹션으로 자연스러운 스크롤
+    // =========================================================
+    function registerAddressAndScroll() {
+      state.address.detail = document.getElementById('detailAddressInput').value.trim();
+      state.address.gate = document.getElementById('gateCodeInput').value.trim();
+      state.address.direction = document.getElementById('directionInput').value.trim();
+
+      const nextSection = document.getElementById('section-delivery');
+      if (nextSection) {
+        nextSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // =========================================================
+    // 2. 아이콘 3단계 클릭 인터랙션 (기본 -> 1클릭 O -> 2클릭 흑백+X -> 3클릭 기본)
+    // =========================================================
+    function toggleIconChoice(btnEl) {
+      const group = btnEl.getAttribute('data-group');
+      const current = btnEl.getAttribute('data-choice') || 'none';
+
+      let nextChoice = 'none';
+      if (current === 'none') {
+        nextChoice = 'yes';
+      } else if (current === 'yes') {
+        nextChoice = 'no';
+      } else {
+        nextChoice = 'none';
+      }
+
+      // 결제수단 그룹은 단일 선택(O)만 유지되도록 기존 O 선택 해제
+      if (group === 'payment' && nextChoice === 'yes') {
+        document.querySelectorAll('.icon-option-btn[data-group="payment"]').forEach(other => {
+          if (other !== btnEl && other.getAttribute('data-choice') === 'yes') {
+            other.setAttribute('data-choice', 'none');
+          }
+        });
+      }
+
+      btnEl.setAttribute('data-choice', nextChoice);
+    }
+
+    // =========================================================
+    // 3. 할인쿠폰 체크박스 선택 및 영수증 금액 실시간 반영
+    // =========================================================
+    function toggleCouponCheckbox(amount, btnEl) {
+      const wasChecked = btnEl.classList.contains('checked');
+      document.querySelectorAll('.coupon-row').forEach(row => row.classList.remove('checked'));
+
+      if (!wasChecked) {
+        btnEl.classList.add('checked');
+        state.couponDiscount = amount;
+      } else {
+        state.couponDiscount = 0;
+      }
+
+      const badgeEl = document.getElementById('couponBadgeText');
+      if (state.couponDiscount === 3000) {
+        badgeEl.textContent = '최대 할인 적용중';
+        badgeEl.classList.remove('text-gray-400');
+        badgeEl.classList.add('text-[#2B38E6]');
+      } else if (state.couponDiscount > 0) {
+        badgeEl.textContent = '할인 적용중';
+        badgeEl.classList.remove('text-gray-400');
+        badgeEl.classList.add('text-[#2B38E6]');
+      } else {
+        badgeEl.textContent = '적용 안 함';
+        badgeEl.classList.remove('text-[#2B38E6]');
+        badgeEl.classList.add('text-gray-400');
+      }
+
+      updatePriceUI();
+    }
+
+    function updatePriceUI() {
+      const baseMenu = 38500;
+      const deliveryTip = 2000;
+      const fixedDiscounts = 3000; // 배달팁 할인 1,000 + BHC 할인 2,000
+      const totalDiscount = fixedDiscounts + state.couponDiscount;
+      const finalPrice = baseMenu + deliveryTip - totalDiscount;
+
+      document.getElementById('totalDiscountText').textContent = `-${totalDiscount.toLocaleString()}원`;
+      document.getElementById('couponReceiptText').textContent =
+        state.couponDiscount > 0 ? `-${state.couponDiscount.toLocaleString()}원` : '0원';
+      document.getElementById('finalReceiptPrice').textContent = `${finalPrice.toLocaleString()}원`;
+      document.getElementById('payButton').textContent = `${finalPrice.toLocaleString()}원 결제하기`;
+    }
+
+    // =========================================================
+    // 4. 스크롤 끝 도달 감지 -> 결제 버튼 투명도 조절 및 활성화
+    // =========================================================
+    function evaluateScrollCompletion() {
+      const viewport = document.getElementById('scrollViewport');
+      const payBtn = document.getElementById('payButton');
+      if (!viewport || !payBtn) return;
+
+      const maxScroll = viewport.scrollHeight - viewport.clientHeight;
+      if (maxScroll <= 0) {
+        payBtn.disabled = false;
+        payBtn.style.opacity = '1';
+        return;
+      }
+
+      const progress = Math.max(0, Math.min(1, viewport.scrollTop / maxScroll));
+      const isAtBottom = viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 20;
+
+      if (isAtBottom) {
+        state.reachedBottom = true;
+        payBtn.disabled = false;
+        payBtn.style.opacity = '1';
+      } else {
+        state.reachedBottom = false;
+        payBtn.disabled = true;
+        // 안내 문구 없이 스크롤 진행도에 따른 버튼 투명도만으로 상태 표현
+        const subtleOpacity = 0.28 + progress * 0.22;
+        payBtn.style.opacity = subtleOpacity.toFixed(2);
+      }
+    }
+
+    // =========================================================
+    // 5. 결제 완료 요약 모달 & 초기화
+    // =========================================================
+    function getGroupSummary(groupName, emptyFallback) {
+      const items = Array.from(document.querySelectorAll(`.icon-option-btn[data-group="${groupName}"]`));
+      const parts = [];
+      items.forEach(item => {
+        const choice = item.getAttribute('data-choice');
+        const label = item.getAttribute('data-label');
+        if (choice === 'yes') parts.push(`${label} (O)`);
+        if (choice === 'no') parts.push(`${label} (X)`);
+      });
+      return parts.length > 0 ? parts.join(', ') : emptyFallback;
+    }
+
+    function openPaymentModal() {
+      const payBtn = document.getElementById('payButton');
+      if (payBtn.disabled) return;
+
+      const addrFull = state.address.detail
+        ? `${state.address.base} ${state.address.detail}`
+        : state.address.base;
+
+      const deliverySummary = getGroupSummary('delivery', '선택 없음');
+      const storeSummary = getGroupSummary('store', '선택 없음');
+      const paymentSummary = getGroupSummary('payment', '기본 결제수단');
+      const couponSummary = state.couponDiscount > 0
+        ? `${state.couponDiscount.toLocaleString()}원 할인 적용`
+        : '쿠폰 미적용';
+      const finalPriceText = document.getElementById('finalReceiptPrice').textContent;
+
+      const summaryBox = document.getElementById('orderSummaryBox');
+      summaryBox.innerHTML = `
+        <div class="flex justify-between gap-2"><span class="text-gray-400 shrink-0">배달 주소</span><span class="font-semibold text-gray-800 text-right">${addrFull}</span></div>
+        <div class="flex justify-between gap-2"><span class="text-gray-400 shrink-0">배달 요청</span><span class="font-semibold text-gray-800 text-right">${deliverySummary}</span></div>
+        <div class="flex justify-between gap-2"><span class="text-gray-400 shrink-0">가게 요청</span><span class="font-semibold text-gray-800 text-right">${storeSummary}</span></div>
+        <div class="flex justify-between gap-2"><span class="text-gray-400 shrink-0">결제 수단</span><span class="font-semibold text-gray-800 text-right">${paymentSummary}</span></div>
+        <div class="flex justify-between gap-2"><span class="text-gray-400 shrink-0">할인 쿠폰</span><span class="font-semibold text-gray-800 text-right">${couponSummary}</span></div>
+        <div class="flex justify-between gap-2 pt-1.5 border-t border-gray-200"><span class="text-gray-500 font-bold shrink-0">최종 결제</span><span class="font-extrabold text-[#2B38E6] text-right">${finalPriceText}</span></div>
+      `;
+
+      document.getElementById('completeModal').classList.remove('hidden');
+    }
+
+    function resetPrototype() {
+      state.address = {
+        base: '서울 서대문구 연세로50',
+        detail: '',
+        gate: '',
+        direction: ''
+      };
+      state.couponDiscount = 3000;
+      state.reachedBottom = false;
+
+      ['detailAddressInput', 'gateCodeInput', 'directionInput'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      // 모든 아이콘 상태 초기화
+      document.querySelectorAll('.icon-option-btn').forEach(btn => {
+        btn.setAttribute('data-choice', 'none');
+      });
+
+      // 할인쿠폰 체크박스 기본(3,000원) 상태로 복귀
+      document.querySelectorAll('.coupon-row').forEach(row => {
+        const amt = Number(row.getAttribute('data-coupon'));
+        if (amt === 3000) {
+          row.classList.add('checked');
+        } else {
+          row.classList.remove('checked');
+        }
+      });
+      const badgeEl = document.getElementById('couponBadgeText');
+      badgeEl.textContent = '최대 할인 적용중';
+      badgeEl.classList.remove('text-gray-400');
+      badgeEl.classList.add('text-[#2B38E6]');
+
+      updatePriceUI();
+      document.getElementById('completeModal').classList.add('hidden');
+
+      const viewport = document.getElementById('scrollViewport');
+      if (viewport) {
+        viewport.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      setTimeout(evaluateScrollCompletion, 120);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const viewport = document.getElementById('scrollViewport');
+      if (viewport) {
+        viewport.addEventListener('scroll', evaluateScrollCompletion, { passive: true });
+      }
+      window.addEventListener('resize', evaluateScrollCompletion);
+
+      updatePriceUI();
+      evaluateScrollCompletion();
+    });
+  </script>
+</body>
+</html>
